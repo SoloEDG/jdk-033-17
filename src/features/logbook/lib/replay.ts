@@ -17,6 +17,7 @@ export function sampleAt(samples: Sample[], time: number): Sample | null {
       knots: mix(a.boat.knots, b.boat.knots, fraction),
     },
     wind: {
+      ...discrete.wind,
       bearing: normalize(a.wind.bearing + angleDelta(a.wind.bearing, b.wind.bearing) * fraction),
       knots: mix(a.wind.knots, b.wind.knots, fraction),
     },

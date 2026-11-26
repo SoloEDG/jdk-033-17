@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ChevronLeft, ChevronRight, Sailboat } from 'lucide-vue-next'
 import { compass } from '../../../shared/format'
-import type { Boat } from '../../../shared/race'
-defineProps<{ boat: Boat; disabled: boolean }>()
+import type { Boat, Wind } from '../../../shared/race'
+import { sailProfile } from '../lib/performance'
+const props = defineProps<{ boat: Boat; wind: Wind; disabled: boolean }>()
 defineEmits<{ steer: [value: number]; sheet: [value: number] }>()
+const profile = computed(() => sailProfile(props.boat, props.wind))
+const load = computed(() => Math.round(props.boat.load ?? profile.value.loadPercent))
 </script>
 
 <template>
@@ -13,6 +17,12 @@ defineEmits<{ steer: [value: number]; sheet: [value: number] }>()
       <div class="reading"><strong data-testid="boat-speed">{{ boat.knots.toFixed(1) }}</strong><span> kn</span><small>对地航速</small></div>
       <div class="reading course-reading"><strong data-testid="heading">{{ compass(boat.heading) }}</strong><small>船首</small></div>
     </div>
+    <div class="load-row">
+      <span>帆载</span>
+      <div class="load-meter" aria-hidden="true"><i :style="{ width: `${load}%` }" :data-tone="load > 72 ? 'high' : load < 35 ? 'low' : 'medium'"></i></div>
+      <output data-testid="sail-load">{{ load }}%</output>
+    </div>
+    <p class="load-hint" data-testid="sail-load-hint">最佳帆角 {{ Math.round(profile.preferredSheet) }}° · 相对风角 {{ Math.round(profile.relativeAngle) }}°</p>
     <label class="slider-label" for="sheet">帆角 <output>{{ boat.sheet }}°</output></label>
     <input id="sheet" type="range" min="0" max="85" :value="boat.sheet" :disabled="disabled" @input="$emit('sheet', Number(($event.target as HTMLInputElement).value))">
     <div class="segment rudder">

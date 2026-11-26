@@ -1,2 +1,7 @@
 export { useSail } from './model/useSail'
 export { default as SailPanel } from './ui/SailPanel.vue'
+export { advanceBoat } from './lib/dynamics'
+export { sailProfile } from './lib/performance'
+export type { SailProfile } from './lib/performance'
+export { advanceBoatStep, advanceStationaryStep } from './lib/integrate'
+export type { FieldStep, MotionSlice } from './lib/integrate'

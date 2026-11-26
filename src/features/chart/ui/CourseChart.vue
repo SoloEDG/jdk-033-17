@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Anchor, Crosshair, LocateFixed } from 'lucide-vue-next'
-import type { Course, Point, Sample } from '../../../shared/race'
+import type { Course, Point, Sample, WindMode } from '../../../shared/race'
 import { buoyPosition, gateEnds } from '../lib/geometry'
 import { pathFor, soundings } from '../lib/chartMarks'
+import { bandIntersection, bandLabelPosition, bandPolygonPoints, gustBands, polygonString, type GustBand } from '../../wind/lib/bands'
 import BoatGlyph from './BoatGlyph.vue'
 
-const props = defineProps<{ course: Course; frame: Sample; trail: Point[]; replay: boolean; focus: Point | null }>()
+const props = defineProps<{ course: Course; frame: Sample; trail: Point[]; replay: boolean; focus: Point | null; windMode: WindMode }>()
 const route = computed(() => pathFor([props.course.start, ...props.course.gates.flatMap(gate => gate.approach ? [gate.approach.center, gate.center] : [gate.center])]))
 const trailPath = computed(() => pathFor(props.trail))
+const beamBand = gustBands[0]
+const reachBand = gustBands[1]
+function pointsFor(band: GustBand): string { return polygonString(bandPolygonPoints(band, props.frame.time)) }
+function centerFor(band: GustBand): Point { return bandLabelPosition(band, props.frame.time) }
+function overlapCenter(): Point | null { return bandIntersection(beamBand, reachBand, props.frame.time) }
 </script>
 
 <template>
@@ -17,6 +23,7 @@ const trailPath = computed(() => pathFor(props.trail))
       <defs>
         <pattern id="sea-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#8fb4b5" stroke-opacity=".22"/></pattern>
         <pattern id="land-hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="#b0a581" stroke-width="1" opacity=".43"/></pattern>
+        <clipPath id="wind-beam-clip" clipPathUnits="userSpaceOnUse"><polygon :points="pointsFor(beamBand)"/></clipPath>
       </defs>
       <rect width="960" height="570" fill="#27555b"/>
       <rect width="960" height="570" fill="url(#sea-grid)"/>
@@ -30,6 +37,15 @@ const trailPath = computed(() => pathFor(props.trail))
         <text :x="h.center.x" :y="h.center.y + 6" text-anchor="middle" :fill="h.radius > 100 ? '#292d2b' : '#e4dcc0'" class="water-text">{{ h.id }}</text>
       </g>
       <text v-for="depth in soundings" :key="depth.join(',')" :x="depth[0]" :y="depth[1]" fill="#a7c2bd" opacity=".55" class="depth">{{ depth[2] }}</text>
+      <g v-if="windMode === 'shifting'" class="wind-bands" data-testid="wind-bands" pointer-events="none">
+        <polygon v-for="band in gustBands" :key="band.id" :points="pointsFor(band)" :fill="band.color" fill-opacity=".16" :stroke="band.color" stroke-width="1.5" stroke-dasharray="10 7" stroke-opacity=".72"/>
+        <polygon :points="pointsFor(reachBand)" clip-path="url(#wind-beam-clip)" fill="#ff8a5c" fill-opacity=".34" stroke="#ffd0bd" stroke-width="1.4"/>
+        <text v-for="band in gustBands" :key="`label-${band.id}`" :x="centerFor(band).x" :y="centerFor(band).y" text-anchor="middle" :fill="band.color" class="wind-band-label">{{ band.name }} · {{ band.knots }} kn</text>
+        <g v-if="overlapCenter()" data-testid="overlap-zone" :transform="`translate(${overlapCenter()!.x} ${overlapCenter()!.y})`">
+          <rect x="-54" y="-15" width="108" height="23" rx="3" fill="#3a2c25" opacity=".78"/>
+          <text y="1" text-anchor="middle" fill="#ffd0bd" class="wind-overlap-label">叠合低风区</text>
+        </g>
+      </g>
       <path :d="route" fill="none" stroke="#d0c89c" stroke-width="1.6" stroke-dasharray="4 7" opacity=".63"/>
       <path :d="trailPath" fill="none" stroke="#e9f6ef" stroke-width="2" stroke-linejoin="round"/>
       <g v-for="(gate, index) in course.gates" :key="gate.id" :opacity="index < frame.nextGate ? .42 : 1">

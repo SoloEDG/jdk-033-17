@@ -1,2 +1,7 @@
 export { useWind } from './model/useWind'
 export { default as WindPanel } from './ui/WindPanel.vue'
+export { default as WindReviewPanel } from './ui/WindReviewPanel.vue'
+export * from './lib/bands'
+export * from './lib/classify'
+export { windAt, ambientWindAt, steadyWindAt } from './lib/forecast'
+export * from './lib/review'

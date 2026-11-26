@@ -26,7 +26,7 @@ button { color: inherit; }
 .mast-data { font-size: 13px; color: #445652; }
 .divider { width: 1px; height: 17px; background: var(--rule); margin: 0 3px; }
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 288px); gap: 18px; margin-top: 18px; }
-.main-column { min-width: 0; }
+.main-column { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .race-bar { background: var(--ink); color: #f7f1dd; display: flex; align-items: center; gap: 25px; min-height: 60px; padding: 9px 14px; }
 .timer { display: grid; gap: 3px; }
 .timer span { color: #c6c6b2; font-size: 10px; }
@@ -72,6 +72,46 @@ input[type=range] { width: 100%; margin: 5px 0 10px; accent-color: #39696a; }
 .marks li[data-state=cleared] { color: #4c7065; }
 .penalty { display: flex; justify-content: space-between; font-size: 12px; }
 .penalty output { color: #893b27; }
+.hold-hint { font-size: 12px; color: #ffe7a3; background: rgba(255, 212, 85, .12); border: 1px solid rgba(255, 212, 85, .42); padding: 6px 9px; border-radius: 3px; white-space: nowrap; }
+.release-button { animation: release-pulse 1.4s ease-in-out infinite; }
+@keyframes release-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 212, 85, .45); } 50% { box-shadow: 0 0 0 5px rgba(255, 212, 85, 0); } }
+.wind-phase strong { font: 700 15px var(--display); white-space: nowrap; }
+.wind-phase[data-phase=overlap] strong { color: #b54d2e; }
+.wind-phase[data-phase=tail] strong { color: #397a43; }
+.wind-phase[data-phase=cross] strong { color: #276a87; }
+.wind-component-list { display: flex; flex-wrap: wrap; gap: 5px; margin: -3px 0 10px; }
+.wind-component-list span { display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border: 1px solid #c3bda7; border-radius: 999px; background: #fffae8; font-size: 11px; }
+.composed-low { margin: -3px 0 9px; padding: 6px 7px; border-left: 3px solid #b54d2e; background: #f2d8cb; color: #7c341f; font-size: 11px; line-height: 1.45; }
+.load-row { display: flex; align-items: center; gap: 9px; font-size: 12px; margin: -2px 0 4px; }
+.load-row output { width: 42px; text-align: right; font: 13px var(--mono); }
+.load-meter { flex: 1; height: 8px; overflow: hidden; border-radius: 999px; background: #d8d1b8; }
+.load-meter i { display: block; height: 100%; border-radius: inherit; background: #5b8f74; transition: width .12s linear; }
+.load-meter i[data-tone=medium] { background: #c58a2c; }
+.load-meter i[data-tone=high] { background: #b5482e; }
+.load-meter i[data-tone=low] { background: #6e9fbd; }
+.load-hint { margin: 0 0 9px; color: #687064; font-size: 11px; }
+.wind-band-label, .wind-overlap-label { font-family: var(--display); letter-spacing: .04em; paint-order: stroke; stroke: rgba(20, 48, 52, .82); stroke-width: 3px; }
+.wind-review { margin: 0; }
+.wind-story-button { width: 100%; display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 9px 10px; border: 1px solid #24484a; border-radius: 3px; background: #31585a; color: #fff4db; text-align: left; font-weight: 700; }
+.wind-story-button:hover { background: #3d6b6d; }
+.wind-story-button b { margin-left: auto; font: 12px var(--mono); color: #ffd455; }
+.wind-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.wind-metrics span { display: grid; gap: 3px; padding: 7px; background: #e7dfc5; border: 1px solid #cfc6aa; }
+.wind-metrics b { font-size: 11px; color: #5d6256; }
+.wind-metrics output { font: 13px var(--mono); color: #24484a; }
+.wind-story-summary, .wind-story-sail, .wind-story-timing { margin: 8px 0 0; font-size: 12px; line-height: 1.6; }
+.wind-story-sail { color: #365c5d; }
+.wind-story-timing { padding: 8px 9px; border-left: 3px solid #c58a2c; background: #efe5c5; color: #4f442d; }
+.wind-leg-list { display: flex; flex-direction: column; max-height: 220px; overflow: auto; margin-top: 9px; }
+.wind-leg { display: grid; grid-template-columns: 14px 43px minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 34px; padding: 5px 4px; border: 0; border-top: 1px solid #d9d2b9; background: transparent; text-align: left; font-size: 12px; }
+.wind-leg:hover { background: #ffe598; }
+.wind-leg time, .wind-leg b { font: 10px var(--mono); white-space: nowrap; }
+.wind-leg span small { color: #7a715d; }
+.wind-leg[data-phase=cross] > svg { color: #2784ad; }
+.wind-leg[data-phase=overlap] > svg { color: #b54d2e; }
+.wind-leg[data-phase=tail] > svg { color: #397a43; }
+.event-list button[data-kind=wind] { border-left: 3px solid #65a9ad; background: #e7f1e8; }
+.logbook { padding: 11px 14px; }
 .logbook { padding: 11px 14px; }
 .log-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
 .log-select { display: flex; align-items: center; gap: 6px; min-width: 0; }
@@ -96,11 +136,14 @@ input[type=range] { width: 100%; margin: 5px 0 10px; accent-color: #39696a; }
   .instruments { grid-row: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .marks { grid-column: 1 / -1; }
   .logbook { grid-row: 4; }
+  .wind-review { grid-row: 5; }
+  .hold-hint { flex-basis: 100%; white-space: normal; }
 }
 @media (max-width: 400px) {
   .race-bar { padding-inline: 8px; gap: 11px; }
   .instrument { padding-inline: 9px; }
   .primary { padding-inline: 8px; }
+  .hold-hint { display: none; }
   .timer output { font-size: 16px; }
   .chart-tag { left: 6px; top: 6px; }
   .chart-state { right: 6px; bottom: 6px; }
